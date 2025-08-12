@@ -1,8 +1,10 @@
 
 package com.railse.hiring.workforcemgmt.controller;
 
+import com.railse.hiring.workforcemgmt.common.exception.ResourceNotFoundException;
 import com.railse.hiring.workforcemgmt.common.model.response.Response;
 import com.railse.hiring.workforcemgmt.dto.*;
+import com.railse.hiring.workforcemgmt.model.enums.Priority;
 import com.railse.hiring.workforcemgmt.service.TaskManagementService;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +12,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/task-mgmt")
-public class TaskManagementController {
+public class
+
+TaskManagementController {
 
     private final TaskManagementService taskManagementService;
 
@@ -42,4 +46,21 @@ public class TaskManagementController {
     public Response<List<TaskManagementDto>> fetchByDate(@RequestBody TaskFetchByDateRequest request) {
         return new Response<>(taskManagementService.fetchTasksByDate(request));
     }
+    @PostMapping("/change-priority")
+    public Response<TaskManagementDto> changePriority(@RequestBody ChangePriorityRequest request) {
+        return new Response<>(taskManagementService.changeTaskPriority(request));
+    }
+
+    @GetMapping("/tasks/priority/{priority}")
+    public Response<List<TaskManagementDto>> getTasksByPriority(@PathVariable String priority) {
+        Priority priorityEnum;
+        try {
+            priorityEnum = Priority.valueOf(priority.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResourceNotFoundException("Invalid priority: " + priority + ". Valid values are: LOW, MEDIUM, HIGH");
+        }
+
+        return new Response<>(taskManagementService.getTasksByPriority(priorityEnum));
+    }
+
 }
